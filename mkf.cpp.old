@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <string.h>
+#include <user/engine.h>
+#include <user/screen.h>
+#include <user/resfile.h>
+#include <user/graphic.h>
+#include <user/keyboard.h>
+
+void main(int argc, char **argv)  {
+  InitUserEngine(argc, argv);
+  int inp;
+  if(argc < 2)  {
+    printf("USAGE: mkf <fontdir>\n");
+    exit(1);
+    }
+  int xpos = 0;
+  int ypos = 0;
+  Screen *screen = new Screen(320, 200);
+  Keyboard *key = new Keyboard;
+  char *buf;
+  int ctr;
+  Graphic *tmpg = NULL;
+
+  int strst = strlen(argv[1]);
+  char *fn = new char[strst+20];
+  strcpy(fn, argv[1]);
+
+  char tmpbuf[30];
+  bzero(tmpbuf, 30);
+  char *ind = &fn[strst];
+  while(ind != fn && ind[-1] != '\\')  ind--;
+  sprintf(tmpbuf, "%s.sgf", ind);
+  { NewResFile fonfile(tmpbuf);
+
+    fn[strst] = '/';
+    strst++;
+    fn[strst] = 0;
+    buf = &fn[strst];
+
+    sprintf(buf, "32.bmp%c", 0);
+    if(access(fn, R_OK))
+      Exit(-1, "Critical Error, Space Graphic (32.bmp) not present!\n");
+	
+    for(ctr=0; ctr<256; ctr++)  {
+      if(isgraph(ctr) || ctr == ' ')  {
+	FILE *tmpf;
+        sprintf(buf, "%d.bmp%c", ctr, 0);
+        tmpf = fopen(fn, "r");
+        if(tmpf != NULL)  {
+	  fclose(tmpf);
+	  tmpg = new Graphic(fn);
+	  if(ctr != ' ')  tmpg->Trim();
+	  if(tmpg->image == NULL)  {
+	    delete tmpg;
+	    tmpg = NULL;
+	    }
+	  else  {
+	    screen->DrawGraphic(*tmpg, xpos-tmpg->xcenter, ypos-tmpg->ycenter);
+	    xpos+=(tmpg->xsize+1);
+	    }
+	  }
+        }
+      fonfile.Add(tmpg);
+      if(tmpg != NULL)  delete tmpg;
+      tmpg = NULL;
+      }
+    }
+  Graphic Curg("cursor.bmp");
+  Curg.Trim();
+
+  screen->SetPaletteEntry(0, 0, 0, 0);
+  screen->SetPaletteEntry(255, 0, 0, 255);
+  screen->SetPaletteEntry(2, 255, 0, 0);
+  screen->SetFont(tmpbuf);
+  screen->SetCursor(Curg);
+  for(ctr=0; ctr<256; ++ctr)
+    if(isgraph(ctr)) { screen->Printf(0, 0xFFFFFFFF, "%c", ctr);
+    printf("%c", ctr);
+    }
+  printf("\n", ctr);
+  screen->Print(0, 0xFFFFFFFF, "\n\nThis is your font.\nYou Like it?\n");
+  screen->RefreshFull();
+  screen->Show();
+  inp = key->WaitForKey();
+  char tmp[2];
+  tmp[1] = 0;
+  while(inp != KEY_ESC)  {
+    tmp[0] = inp;
+    screen->Print(0, 1, tmp);
+    screen->RefreshFull();
+    inp = key->WaitForKey();
+    }
+  delete key;
+  delete screen;
+  }
