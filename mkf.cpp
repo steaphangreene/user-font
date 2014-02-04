@@ -2,11 +2,11 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <string.h>
-#include <user/engine.h>
-#include <user/screen.h>
-#include <user/resfile.h>
-#include <user/graphic.h>
-#include <user/keyboard.h>
+#include "../user/engine.h"
+#include "../user/screen.h"
+#include "../user/resfile.h"
+#include "../user/graphic.h"
+#include "../user/keyboard.h"
 
 int main(int argc, char **argv)  {
   U2_Init(argc, argv);
@@ -50,12 +50,12 @@ int main(int argc, char **argv)  {
 	if(isgraph(ctr)) {
 	  if(pos>=ref.xsize) U2_Exit(1, "String overflow at \"%c\"!\n", ctr);
 	  for(; pos<ref.xsize; ++pos) {
-	    for(yp=0; yp<ref.ysize && ref.image[yp].uc[pos]<1; ++yp);
+	    for(yp=0; yp<ref.ysize && ref.image[yp].u8[pos]<1; ++yp);
 	    if(yp<ref.ysize) break;
 	    }
 	  if(pos>=ref.xsize) U2_Exit(1, "String overflow at \"%c\"!\n", ctr);
 	  for(xs=0; xs<(ref.xsize-pos); ++xs) {
-	    for(yp=0; yp<ref.ysize && ref.image[yp].uc[pos+xs]<1; ++yp);
+	    for(yp=0; yp<ref.ysize && ref.image[yp].u8[pos+xs]<1; ++yp);
 	    if(yp>=ref.ysize) break;
 	    }
 	  tmpg=new Graphic(ref.Partial(pos, 0, pos+xs, ref.ysize));

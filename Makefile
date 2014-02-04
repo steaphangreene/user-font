@@ -1,10 +1,10 @@
-CC=     gcc -O3 -s `U2-CFlags`
-USER=	$(shell U2-Dir)
+CC=     gcc -O3 -s `../user/U2-CFlags`
+USER=	$(shell ../user/U2-Dir)
 OBJS=   $(USER)/*.o
 DEPS=   $(USER)/*.cpp
 DEPH=   $(USER)/*.h
 ALL=    $(DEPS) $(DEPH) $(OBJS) Makefile
-LIBS=	`U2-Libs`
+LIBS=	`../user/U2-Libs`
 
 mkf:	mkf.o $(ALL)
 	make -C $(USER)
